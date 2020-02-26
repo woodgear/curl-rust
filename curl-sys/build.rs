@@ -279,6 +279,24 @@ fn main() {
         if cfg!(feature = "spnego") {
             cfg.file("curl/lib/vauth/spnego_sspi.c");
         }
+
+        if cfg!(feature = "xp") {
+            cfg.define("_USING_V110_SDK71_", None);
+        }
+
+        if cfg!(feature = "static-openssl") {
+            cfg.define("USE_OPENSSL", None)
+                .file("curl/lib/vtls/openssl.c");
+
+            if let Some(path) = env::var_os("DEP_OPENSSL_INCLUDE") {
+                cfg.include(path);
+            }
+            
+            println!("cargo:rustc-link-lib=libeay32");
+            println!("cargo:rustc-link-lib=ssleay32");
+            println!("cargo:rustc-link-lib=gdi32");
+            println!("cargo:rustc-link-lib=user32");
+        }
     } else {
         if target.contains("-apple-") {
             cfg.define("__APPLE__", None)
